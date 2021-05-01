@@ -12,7 +12,7 @@ class TransaccionTest extends TestCase
     /**
      * @test
      */
-    public function cuandoEnvioDocumentoYCelularDeUnUsuarioRegistradoAStoreReciboSuccessTrueUnTokenY200()
+    public function cuandoEnvioTipoRecargaBilleteraYvalorAStoreReciboSuccessTrueElValorY201()
     {
         $usuarioPrueba = $this->getUsuarioPrueba();
         $response = $this->post('api/v1/transacciones', [
@@ -32,6 +32,28 @@ class TransaccionTest extends TestCase
                 })
                 ->etc();
         });
-
+    }
+    /**
+     * @test
+     */
+    public function cuandoEnvioTipoConsultarSaldoAStoreReciboSuccessTrueElSaldoY201()
+    {
+        $usuarioPrueba = $this->getUsuarioPrueba();
+        $response = $this->post('api/v1/transacciones', [
+            "tipo" => "consultarSaldo",
+            "documento" => $usuarioPrueba["documento"],
+            "celular" => $usuarioPrueba["celular"]
+        ]);
+        $response->assertJson(function (AssertableJson $json) {
+            $json
+                ->where('success', true)
+                ->where('code', '201')
+                ->has('data', function ($jsonData) {
+                    $jsonData
+                        ->where("saldo", '2000.00')
+                        ->etc();
+                })
+                ->etc();
+        });
     }
 }
