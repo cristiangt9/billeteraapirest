@@ -88,4 +88,45 @@ class TransaccionTest extends TestCase
                 ->etc();
         });
     }
+    /**
+     * @test
+     */
+    public function cuandoEnvioTipoConfirmacionPagoAStoreReciboSuccessTrueElSaldoRestanteY201()
+    {
+        $usuarioPrueba = $this->getUsuarioPrueba();
+        //me logeo
+        $responseLogin = $this->post('api/v1/users/login', [
+            "documento" => $usuarioPrueba["documento"],
+            "celular" => $usuarioPrueba["celular"]
+        ]);
+        // Guardo el token
+        $token = json_decode($responseLogin->getContent(), true)["data"]["token"];
+        // Hago la solicitud
+        $responseSolicitud = $this->post('api/v1/transacciones', [
+            "tipo" => "solicitudPago",
+            "token" => $token,
+            "valor" => 50,
+            "documento" => $usuarioPrueba["documento"],
+            "celular" => $usuarioPrueba["celular"]
+        ]);
+        // Guardo el token de confirmacion
+        $tokenConfirmacion = json_decode($responseSolicitud->getContent(), true)["data"]["codigo"];
+
+        $response = $this->post('api/v1/transacciones', [
+            "tipo" => "confirmacionPago",
+            "token" => $token,
+            "tokenConfirmacion" => $tokenConfirmacion
+        ]);
+        $response->assertJson(function (AssertableJson $json) {
+            $json
+                ->where('success', true)
+                ->where('code', '200')
+                ->has('data', function ($jsonData) {
+                    $jsonData
+                        ->has("saldo")
+                        ->etc();
+                })
+                ->etc();
+        });
+    }
 }

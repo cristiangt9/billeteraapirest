@@ -43,6 +43,8 @@ class TransaccionController extends BaseSoapController
                 return $this->consultarSaldo($request);
             } else if ($tipo == 'solicitudPago') {
                 return $this->solicitudPago($request);
+            } else if ($tipo == 'confirmacionPago') {
+                return $this->confirmacionPago($request);
             }
         } else {
             return $this->defaultJsonResponseWithoutData(false, "Debe incluir un tipo de transaccion", null, null, 404);
@@ -173,6 +175,37 @@ class TransaccionController extends BaseSoapController
 
             $response = $this->service->solicitudPago($inputs);
             $responseProccesed = $this->keyValueToArry($this->responseArrayToArray($response->solicitudPagoResult));
+            if ($responseProccesed["success"] != "true") {
+                return $this->defaultJsonResponseArray(false, $responseProccesed);
+            }
+
+            return $this->defaultJsonResponseArray(true, $responseProccesed);
+        } catch (\Exception $e) {
+            return $this->defaultJsonResponseWithoutData(false, "Lo sentimos, pero algo fallo", $e->getMessage(), null, 422);
+        }
+    }
+
+    private function confirmacionPago(Request $request)
+    {
+        try {
+            // recoger la informacion
+            $rules = [
+                "token" => "required",
+                "tokenConfirmacion" => "required",
+            ];
+            $inputs = [
+                "token" => $request["token"],
+                "tokenConfirmacion" => $request["tokenConfirmacion"],
+            ];
+            // validar 
+            $validator = $this->validatorInput($inputs, $rules);
+
+            if (!$validator->validated) {
+                return $this->defaultJsonResponse(false, "Datos faltantes o incorrectos", "Uno o mas datos son invalidos", $validator->errors, 422);
+            }
+
+            $response = $this->service->confirmacionPago($inputs);
+            $responseProccesed = $this->keyValueToArry($this->responseArrayToArray($response->confirmacionPagoResult));
             if ($responseProccesed["success"] != "true") {
                 return $this->defaultJsonResponseArray(false, $responseProccesed);
             }

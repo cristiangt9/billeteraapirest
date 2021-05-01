@@ -18,8 +18,8 @@ abstract class TestCase extends BaseTestCase
         return [
             "documento" => "1757407323",
             "nombres" => "Cristian David Gonzalez Torres",
-            "email" => "cristiangt96@gmail.com",
-            "celular" => "3142287726"
+            "email" => "cristiangt99@gmail.com",
+            "celular" => "3142287729"
         ]; // 
     }
 }
