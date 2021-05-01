@@ -35,12 +35,14 @@ class TransaccionController extends BaseSoapController
      */
     public function store(Request $request)
     {
-        if($request->has("tipo")) {
+        if ($request->has("tipo")) {
             $tipo = $request->tipo;
             if ($tipo == 'recargarBilletera') {
                 return $this->recargarBilletera($request);
-            } else if($tipo == 'consultarSaldo') {
+            } else if ($tipo == 'consultarSaldo') {
                 return $this->consultarSaldo($request);
+            } else if ($tipo == 'solicitudPago') {
+                return $this->solicitudPago($request);
             }
         } else {
             return $this->defaultJsonResponseWithoutData(false, "Debe incluir un tipo de transaccion", null, null, 404);
@@ -113,6 +115,7 @@ class TransaccionController extends BaseSoapController
             return $this->defaultJsonResponseWithoutData(false, "Lo sentimos, pero algo fallo", $e->getMessage(), null, 422);
         }
     }
+
     private function consultarSaldo(Request $request)
     {
         try {
@@ -134,6 +137,42 @@ class TransaccionController extends BaseSoapController
 
             $response = $this->service->consultarSaldo($inputs);
             $responseProccesed = $this->keyValueToArry($this->responseArrayToArray($response->consultarSaldoResult));
+            if ($responseProccesed["success"] != "true") {
+                return $this->defaultJsonResponseArray(false, $responseProccesed);
+            }
+
+            return $this->defaultJsonResponseArray(true, $responseProccesed);
+        } catch (\Exception $e) {
+            return $this->defaultJsonResponseWithoutData(false, "Lo sentimos, pero algo fallo", $e->getMessage(), null, 422);
+        }
+    }
+
+    private function solicitudPago(Request $request)
+    {
+        try {
+            // recoger la informacion
+            $rules = [
+                "token" => "required",
+                "celular" => "required",
+                "documento" => "required",
+                "valor" => "required|numeric"
+            ];
+
+            $inputs = [
+                "token" => $request["token"],
+                "valor" => $request["valor"],
+                "documento" => $request["documento"],
+                "celular" => $request["celular"]
+            ];
+            // validar 
+            $validator = $this->validatorInput($inputs, $rules);
+
+            if (!$validator->validated) {
+                return $this->defaultJsonResponse(false, "Datos faltantes o incorrectos", "Uno o mas datos son invalidos", $validator->errors, 422);
+            }
+
+            $response = $this->service->solicitudPago($inputs);
+            $responseProccesed = $this->keyValueToArry($this->responseArrayToArray($response->solicitudPagoResult));
             if ($responseProccesed["success"] != "true") {
                 return $this->defaultJsonResponseArray(false, $responseProccesed);
             }
