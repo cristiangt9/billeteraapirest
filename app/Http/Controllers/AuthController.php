@@ -60,7 +60,7 @@ class AuthController extends BaseSoapController
             if ($responseProccesed["success"] != "true") {
                 return $this->defaultJsonResponseArray(false, $responseProccesed);
             }
-            
+
             return $this->defaultJsonResponseArray(true, $responseProccesed);
         } catch (\Exception $e) {
             return $this->defaultJsonResponseWithoutData(false, "Lo sentimos, pero algo fallo", $e->getMessage(), null, 422);
@@ -99,5 +99,41 @@ class AuthController extends BaseSoapController
     public function destroy($id)
     {
         //
+    }
+    /**
+     * login recibe las credenciales y retorna un token de sesion en caso de exito.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function login(Request $request)
+    {
+        try {
+            // recoger la informacion
+            $rules = [
+                "documento" => "required",
+                "celular" => "required"
+            ];
+            $inputs = [
+                "documento" => $request["documento"],
+                "celular" => $request["celular"]
+            ];
+            // validar 
+            $validator = $this->validatorInput($inputs, $rules);
+
+            if (!$validator->validated) {
+                return $this->defaultJsonResponse(false, "Datos faltantes o incorrectos", "Uno o mas datos son invalidos", $validator->errors, 422);
+            }
+
+            $response = $this->service->login($inputs);
+            $responseProccesed = $this->keyValueToArry($this->responseArrayToArray($response->loginResult));
+            if ($responseProccesed["success"] != "true") {
+                return $this->defaultJsonResponseArray(false, $responseProccesed);
+            }
+
+            return $this->defaultJsonResponseArray(true, $responseProccesed);
+        } catch (\Exception $e) {
+            return $this->defaultJsonResponseWithoutData(false, "Lo sentimos, pero algo fallo", $e->getMessage(), null, 422);
+        }
     }
 }
