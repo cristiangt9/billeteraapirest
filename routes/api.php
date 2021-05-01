@@ -7,5 +7,5 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::post('users/login', [AuthController::class, 'login']);
     Route::apiResource('users',AuthController::class)->only(['store']);
-    Route::apiResource('transaccion',TransaccionController::class);
+    Route::apiResource('transacciones',TransaccionController::class)->only(['store']);
 });

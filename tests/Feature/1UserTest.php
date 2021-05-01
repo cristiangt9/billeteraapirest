@@ -7,19 +7,15 @@ use Tests\TestCase;
 
 class UserTest extends TestCase
 {
-    private $usuarioPrueba = [
-        "documento" => "1757407323",
-        "nombres" => "Cristian David Gonzalez Torres",
-        "email" => "cristiangt912@gmail.com",
-        "celular" => "31422877212"
-    ];
+    
     /**
      * @test
      */
     public function cuandoEnvioLosDatosDeUsuarioNuevoReciboSuccessTrueUnTokenY201()
     {
         // para que este test pase debo garantizar que la base no tenga el usuario que voy a crear
-        $response = $this->post('api/v1/users', $this->usuarioPrueba);
+        $usuarioPrueba = $this->getUsuarioPrueba(); // se encuentra en TestCase
+        $response = $this->post('api/v1/users', $usuarioPrueba);
         $response->assertJson(function (AssertableJson $json) {
             $json
                 ->where('success', true)
@@ -38,9 +34,10 @@ class UserTest extends TestCase
      */
     public function cuandoEnvioDocumentoYCelularDeUnUsuarioRegistradoALoginReciboSuccessTrueUnTokenY200()
     {
+        $usuarioPrueba = $this->getUsuarioPrueba();
         $response = $this->post('api/v1/users/login', [
-            "documento" => $this->usuarioPrueba["documento"],
-            "celular" => $this->usuarioPrueba["celular"]
+            "documento" => $usuarioPrueba["documento"],
+            "celular" => $usuarioPrueba["celular"]
         ]);
         $response->assertJson(function (AssertableJson $json) {
             $json
@@ -55,4 +52,5 @@ class UserTest extends TestCase
         });
 
     }
+    
 }
