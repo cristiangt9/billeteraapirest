@@ -48,7 +48,7 @@ class TransaccionTest extends TestCase
             $json
                 ->where('success', true)
                 ->where('code', '201')
-                ->has('data', function ($jsonData) {
+                ->has('data.item', function ($jsonData) {
                     $jsonData
                         ->where("saldo", '2000.00')
                         ->etc();
